@@ -1,0 +1,54 @@
+services:
+  # Spring Boot
+  crumb-spring-boot:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      platforms: [linux/amd64]
+    image: 'bread-life-spring:latest'
+    container_name: crumb-spring-boot
+    restart: always
+    env_file:
+      - .env
+    depends_on:
+      crumb-postgres:
+        condition: service_healthy
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://crumb-postgres:5432/${POSTGRES_DB}
+      SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER}
+      SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD}
+#      JWT_SECRET: ${JWT_SECRET}
+#      JWT_ACCESS_EXP_SEC: ${JWT_ACCESS_EXP_SEC}
+#      JWT_REFRESH_EXP_SEC: ${JWT_REFRESH_EXP_SEC}
+    ports:
+      - "${SPRING_PORT:-8080}:8080"
+    networks:
+      - crumb-network
+
+  # PostgreSQL
+  crumb-postgres:
+    image: 'postgres:latest'
+    container_name: crumb-postgres
+    restart: always
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - crumb-network
+
+volumes:
+  postgres-data:
+
+networks:
+  crumb-network:
+    driver: bridge
