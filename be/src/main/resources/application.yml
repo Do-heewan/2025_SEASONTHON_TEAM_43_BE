@@ -16,6 +16,7 @@ spring:
       ddl-auto: update # ?? ? validate? ??
     properties:
       hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
         format_sql: true
 
 logging:
@@ -29,6 +30,16 @@ kakao:
   client_id: ${KAKAO_CLIENT_ID}
   client_secret: ${KAKAO_CLIENT_SECRET}
   redirect_uri: ${KAKAO_REDIRECT_URI}
+
+app:
+  kakao:
+    base-url: https://dapi.kakao.com
+    rest-api-key: ${KAKAO_REST_API_KEY}   # 환경변수 권장
+    timeout-ms: 3000
+  google:
+    base-url: https://maps.googleapis.com
+    api-key: ${GOOGLE_PLACES_API_KEY}   # 환경변수 권장
+    timeout-ms: 3000
 
 #springdoc:
 #  swagger-ui:
