@@ -23,18 +23,6 @@ public class KakaoLoginController {
     @GetMapping("/login")
     public ResponseEntity<String> login(@RequestParam("code") String code) {
         String token = kakaoLoginService.getAccessTokenFromKakao(code);
-
-        KakaoUserInfoResponseDto userInfo = kakaoLoginService.getUserInfo(token); // token으로 user Info 불러오기
-//        Long userId = userInfo.getId();
-//        String username = userInfo.getKakaoAccount().getProfile().getNickName();
-//        String userEmail = userInfo.getKakaoAccount().getEmail();
-//
-//        Map<String, Object> response = new HashMap<>(); // id, email, name, token 반환
-//        response.put("accessToken", token);
-//        response.put("userId", userId);
-//        response.put("userName", username);
-//        response.put("userEmail", userEmail);
-
         return ResponseEntity.ok(token);
     }
 
