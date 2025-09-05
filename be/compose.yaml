@@ -4,7 +4,6 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-      platforms: [linux/amd64]
     image: 'bread-life-spring:latest'
     container_name: crumb-spring-boot
     restart: always
@@ -12,6 +11,8 @@ services:
       - .env
     depends_on:
       crumb-postgres:
+        condition: service_healthy
+      crumb-fastapi:
         condition: service_healthy
     environment:
       SPRING_DATASOURCE_URL: jdbc:postgresql://crumb-postgres:5432/${POSTGRES_DB}
@@ -43,6 +44,34 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+    networks:
+      - crumb-network
+
+  # FastAPI
+  crumb-fastapi:
+    build:
+      context: ./recommend
+      dockerfile: Dockerfile
+    container_name: crumb-fastapi
+    restart: always
+    env_file:
+      - .env
+    environment:
+      KAKAO_REST_API_KEY: ${KAKAO_REST_API_KEY}
+      RECO_RADIUS_M: ${RECO_RADIUS_M:-5000}
+      RECO_LIMIT: ${RECO_LIMIT:-10}
+      RECO_INPUT: ${RECO_INPUT}
+      RECO_OUTPUT: ${RECO_OUTPUT}
+    ports:
+      - "${FASTAPI_PORT:-8000}:8000"
+    volumes:
+      - ./recommend:/app
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+      start_period: 5s
     networks:
       - crumb-network
 
