@@ -51,33 +51,52 @@ def coerce_number(s):
 def tidy_address(s: str) -> str:
     s = (s or "").replace("\xa0", " ")
     s = re.sub(r"\s+", " ", s).strip()
-    s = re.sub(r"\([^)]*\)", "", s)   # 괄호 정보 제거
+
+    # 괄호 제거
+    s = re.sub(r"\([^)]*\)", "", s)
+
+    # 층/호/범위 제거: "1,2층", "1~2층", "101호", "108, 109호", "101~104호", "1층", "B1층"
+    s = re.sub(r"\d+\s*,\s*\d+\s*층", "", s)          # "1,2층"
+    s = re.sub(r"\d+\s*~\s*\d+\s*층", "", s)          # "1~2층"
+    s = re.sub(r"\b\d+\s*호\b", "", s)                # "101호"
+    s = re.sub(r"\d+\s*,\s*\d+\s*호", "", s)          # "108, 109호"
+    s = re.sub(r"\d+\s*~\s*\d+\s*호", "", s)          # "101~104호"
+    s = re.sub(r"\b[0-9A-Za-z]*\d+\s*층\b", "", s)    # "1층", "B1층"
+
+    # 쉼표 뒤 불필요 텍스트(상호 등) 잘라내기 (주소가 먼저일 때만)
+    # 예: "대전 ... 1,2층 꾸드뱅베이커리" → "대전 ... "
+    # 단, 번지 형태는 유지하기 위해 '번지/번길/로/길' 등의 주소 키워드가 나오면 그대로 둠
+    parts = [p.strip() for p in s.split(",")]
+    if len(parts) > 1:
+        left = parts[0]
+        # 왼쪽 파트가 주소의 주요 형태를 포함하면 오른쪽은 버림
+        if re.search(r"(로|길|번길|로\d+|길\d+|동|구|군|시|도)\b", left):
+            s = left
+
+    # 다중 특수문자 제거/정리
     s = re.sub(r"[#·•…]+", " ", s)
     return s.strip()
 
 async def fill_missing_coords(df: pd.DataFrame, extras: dict) -> pd.DataFrame:
-    """1) 주소검색 2) 키워드검색(address) 3) 키워드검색(구+빵집명)"""
+    """1) 주소 검색 2) 키워드 검색(address) 3) 키워드 검색(구+빵집명)"""
     idxs_addr = df[(df["address"].astype(str)!="") & (df["lat"].isna() | df["lng"].isna())].index.tolist()
-    all_idxs = df.index.tolist()
-    print(f"[geocode] need coords for {len(idxs_addr)} rows (address-present) / total {len(all_idxs)}")
+    print(f"[geocode] need coords for {len(idxs_addr)} rows (address-present) / total {len(df)}")
 
     failures = []
     filled_total = 0
 
     # attempt 1~2: 주소/키워드 (geocode_address_async 내부에서 처리)
     for attempt in range(2):
-        target = idxs_addr
-        if not target: break
-        tasks = [geocode_address_async(tidy_address(str(df.at[i,"address"]))) for i in target]
+        if not idxs_addr: break
+        tasks = [geocode_address_async(tidy_address(str(df.at[i,"address"]))) for i in idxs_addr]
         results = await asyncio.gather(*tasks, return_exceptions=True)
 
         new_idxs = []
         filled_now = 0
         for k, res in enumerate(results):
-            i = target[k]
+            i = idxs_addr[k]
             if isinstance(res, Exception):
-                new_idxs.append(i)
-                continue
+                new_idxs.append(i); continue
             lat, lng, meta = res
             if lat is not None and lng is not None:
                 df.at[i, "lat"] = lat
@@ -92,21 +111,21 @@ async def fill_missing_coords(df: pd.DataFrame, extras: dict) -> pd.DataFrame:
         if idxs_addr:
             backoff_sleep(attempt)
 
-    # attempt 3: '{구} {빵집명}' 키워드 직접 시도
+    # attempt 3: '{구} {빵집명}' 키워드 검색 (★ 좌표 없는 인덱스만)
     if idxs_addr:
         tasks = []
-        for i in all_idxs:  # 주소가 없어도 전체에서 시도
-            gu = extras.get(i, {}).get("gu", "")
-            nm = extras.get(i, {}).get("bakery", "")
-            q = f"{gu} {nm}".strip()
+        for i in idxs_addr:
+            gu = (extras.get(int(i), {}).get("gu") or "").strip()
+            nm = (extras.get(int(i), {}).get("bakery") or "").strip()
+            q = f"{gu} {nm}".strip() if gu or nm else ""
             if q:
                 tasks.append(_get_json("https://dapi.kakao.com/v2/local/search/keyword.json", {"query": q}))
             else:
                 tasks.append({"_error": {"reason": "no_query"}})
-
         results = await asyncio.gather(*tasks, return_exceptions=True)
         filled_now = 0
-        for i, data in enumerate(results):
+        for k, data in enumerate(results):
+            i = idxs_addr[k]
             if isinstance(data, Exception):
                 continue
             if "_error" not in data:
@@ -116,9 +135,6 @@ async def fill_missing_coords(df: pd.DataFrame, extras: dict) -> pd.DataFrame:
                     df.at[i, "lat"] = y
                     df.at[i, "lng"] = x
                     filled_now += 1
-            else:
-                # 실패는 이미 위 failures에 address 기반으로 쌓였으므로 생략 가능
-                pass
         filled_total += filled_now
         print(f"[geocode] attempt 3: filled {filled_now} (total {filled_total})")
 
@@ -130,20 +146,21 @@ async def fill_missing_coords(df: pd.DataFrame, extras: dict) -> pd.DataFrame:
 
     return df
 
+def extract_gu_from_address(addr: str) -> str:
+    """주소 문자열에서 'XX구' 패턴을 추출 (없으면 빈문자열)"""
+    if not addr:
+        return ""
+    m = re.search(r"([가-힣A-Za-z]+구)", addr)
+    return m.group(1) if m else ""
+
 def main():
     print(f"[preprocess] input={INPUT}")
     raw = pd.read_csv(INPUT, sep=None, engine="python", encoding="utf-8-sig")
     print(f"[preprocess] raw columns: {list(raw.columns)}  rows={len(raw)}")
 
-    # 보조 컬럼 저장(구/빵집명)
-    extras = {}
+    # 원본에서 힌트 컬럼 확보
     raw_gu = raw.get("구")
     raw_nm = raw.get("빵집명")
-    for i in range(len(raw)):
-        extras[i] = {
-            "gu": normalize_text(str(raw_gu.iloc[i])) if raw_gu is not None else "",
-            "bakery": normalize_text(str(raw_nm.iloc[i])) if raw_nm is not None else "",
-        }
 
     df = map_headers(raw)
 
@@ -172,6 +189,15 @@ def main():
 
     print(f"[preprocess] missing coords (before): lat NaN={df['lat'].isna().sum()} lng NaN={df['lng'].isna().sum()}")
 
+    # extras 구성: 주소에서 구 추출 + 이름
+    extras = {
+        int(i): {
+            "gu": extract_gu_from_address(str(df.at[i, "address"])),
+            "bakery": str(df.at[i, "name"]).strip(),
+       }
+        for i in df.index
+    }
+
     if not SKIP_GEOCODE:
         try:
             df = asyncio.run(fill_missing_coords(df, extras))
@@ -182,9 +208,8 @@ def main():
 
     print(f"[preprocess] missing coords (after): lat NaN={df['lat'].isna().sum()} lng NaN={df['lng'].isna().sum()}")
 
-    # ↓↓↓ 디버그용으로 좌표 없는 행도 살리고 싶으면 아래 두 줄 중 위를 주석 처리하고 아래를 사용
+    # 좌표 있는 것만 유지
     kept = df[df["lat"].notna() & df["lng"].notna()].copy()
-    # kept = df.copy()
 
     print(f"[preprocess] keep rows with coords: {len(kept)} / {len(df)}")
     kept.to_csv(OUTPUT, index=False, quoting=csv.QUOTE_MINIMAL)
