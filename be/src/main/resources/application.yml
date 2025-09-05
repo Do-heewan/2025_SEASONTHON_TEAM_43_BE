@@ -13,7 +13,7 @@ spring:
   jpa:
     open-in-view: false
     hibernate:
-      ddl-auto: update # ?? ? validate? ??
+      ddl-auto: update # 배포 시 validate로 변경
     properties:
       hibernate:
         format_sql: true
@@ -21,7 +21,7 @@ spring:
 logging:
   level:
     root: INFO
-    org.hibernate.SQL: DEBUG # ?? ??? ??
+    org.hibernate.SQL: DEBUG # 배포 시 변경
     org.hibernate.type: WARN
     org.crumb.be: INFO
 
