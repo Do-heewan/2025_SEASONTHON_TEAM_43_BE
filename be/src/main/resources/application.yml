@@ -26,9 +26,11 @@ logging:
     org.crumb.be: INFO
 
 kakao:
+  base-url: https://dapi.kakao.com
   client_id: ${KAKAO_CLIENT_ID}
   client_secret: ${KAKAO_CLIENT_SECRET}
   redirect_uri: ${KAKAO_REDIRECT_URI}
+  rest-api-key: ${KAKAO_REST_API_KEY}
 
 springdoc:
   swagger-ui:
