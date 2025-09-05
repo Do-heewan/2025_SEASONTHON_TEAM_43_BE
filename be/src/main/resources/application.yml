@@ -30,13 +30,13 @@ kakao:
   client_secret: ${KAKAO_CLIENT_SECRET}
   redirect_uri: ${KAKAO_REDIRECT_URI}
 
-#springdoc:
-#  swagger-ui:
-#    path: /swagger-ui/index.html
-#    display-operation-id: true
-#    tags-sorter: alpha
-#    operations-sorter: method
-#    doc-expansion: none
-#    try-it-out-enabled: true
-#    filter: true
-#    with-credentials: true
+springdoc:
+  swagger-ui:
+    path: /swagger-ui/index.html
+    display-operation-id: true
+    tags-sorter: alpha
+    operations-sorter: method
+    doc-expansion: none
+    try-it-out-enabled: true
+    filter: true
+    with-credentials: true
