@@ -33,13 +33,9 @@ kakao:
 
 app:
   kakao:
-    base-url: https://dapi.kakao.com
-    rest-api-key: ${KAKAO_REST_API_KEY}   # 환경변수 권장
-    timeout-ms: 3000
+    rest-api-key: ${KAKAO_REST_API_KEY}
   google:
-    base-url: https://maps.googleapis.com
-    api-key: ${GOOGLE_PLACES_API_KEY}   # 환경변수 권장
-    timeout-ms: 3000
+    api-key: ${GOOGLE_PLACES_API_KEY}
 
 #springdoc:
 #  swagger-ui:
