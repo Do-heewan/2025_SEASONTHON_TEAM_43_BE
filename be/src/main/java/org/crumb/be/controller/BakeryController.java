@@ -29,9 +29,8 @@ public class BakeryController {
             @RequestParam @NotNull Double lat,
             @RequestParam @NotNull Double lng,
             @RequestParam(defaultValue = "1500") @Min(100) @Max(50000) Integer radius,
-            @RequestParam(required = false) @Min(1) @Max(100) Integer limit,
-            @RequestParam(required = false, defaultValue = "distance") String sort // distance|rating
+            @RequestParam Integer size
     ) {
-        return bakerySearchService.search(lat, lng, radius, limit, sort);
+        return bakerySearchService.search(lat, lng, radius, size);
     }
 }

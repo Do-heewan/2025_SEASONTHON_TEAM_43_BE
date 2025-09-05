@@ -37,7 +37,7 @@ public class KakaoMapClient {
                 .queryParam("x", lng)
                 .queryParam("y", lat)
                 .queryParam("radius", radiusMeters)
-                .queryParam("size", 10)
+                .queryParam("size", 15)
                 .toUriString();
         System.out.println("url: " + url);
 
@@ -51,7 +51,6 @@ public class KakaoMapClient {
         HttpEntity<Void> entity = new HttpEntity<>(headers);
 
         try {
-            // 4. API 호출
             ResponseEntity<String> response = restTemplate.exchange(
                     url,
                     HttpMethod.GET,
@@ -62,7 +61,6 @@ public class KakaoMapClient {
             System.out.println("Raw Kakao Response: " + response.getBody());
             System.out.println("Status: " + response.getStatusCode());
 
-            // 5. JSON 파싱
             ObjectMapper objectMapper = new ObjectMapper();
             JsonNode root = objectMapper.readTree(response.getBody());
             JsonNode documents = root.path("documents");
@@ -71,7 +69,6 @@ public class KakaoMapClient {
                 return Collections.emptyList();
             }
 
-            // 6. DTO 변환
             List<KakaoBakeryDto> result = new ArrayList<>();
             for (JsonNode doc : documents) {
                 KakaoBakeryDto dto = new KakaoBakeryDto();

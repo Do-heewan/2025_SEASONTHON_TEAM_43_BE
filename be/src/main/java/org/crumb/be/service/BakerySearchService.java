@@ -20,29 +20,40 @@ public class BakerySearchService {
     private final KakaoMapClient kakao;
     private final GoogleMapClient google;
 
-    public List<KakaoBakeryDto> search(double lat, double lng, int radius, Integer limit, String sort) {
+    public List<KakaoBakeryDto> search(double lat, double lng, int radius, int size) {
         List<KakaoBakeryDto> kakaoResult = kakao.searchBakery(lat, lng, radius);
         System.out.println("kakaoResult: " + kakaoResult);
 
         // 거리 계산 / 중복 제거 로직 작성
+        // 중복 제거
+        List<KakaoBakeryDto> deduped = dedupe(kakaoResult);
 
+        // 거리 계산 후 정렬
+        List<KakaoBakeryDto> sorted = deduped.stream()
+                .sorted(Comparator.comparingDouble(b ->
+                        GeoUtils.haversineMeters(lat, lng, b.getLatitude(), b.getLongitude())))
+                .collect(Collectors.toList());
 
-
-        return kakaoResult;
+        // size만큼 자르기
+        if (sorted.size() > size) {
+            return sorted.subList(0, size);
+        } else {
+            return sorted;
+        }
     }
 
-//    private List<BakeryDto> dedupe(List<BakeryDto> items) {
-//        List<BakeryDto> result = new ArrayList<>();
-//        for (BakeryDto b : items) {
-//            String nameKey = normalizeName(b.getName());
-//            boolean exists = result.stream().anyMatch(x ->
-//                    normalizeName(x.getName()).equals(nameKey) &&
-//                            GeoUtils.haversineMeters(x.getLatitude(), x.getLongitude(), b.getLatitude(), b.getLongitude()) < 80
-//            );
-//            if (!exists) result.add(b);
-//        }
-//        return result;
-//    }
+    private List<KakaoBakeryDto> dedupe(List<KakaoBakeryDto> items) {
+        List<KakaoBakeryDto> result = new ArrayList<>();
+        for (KakaoBakeryDto b : items) {
+            String nameKey = normalizeName(b.getName());
+            boolean exists = result.stream().anyMatch(x ->
+                    normalizeName(x.getName()).equals(nameKey) &&
+                            GeoUtils.haversineMeters(x.getLatitude(), x.getLongitude(), b.getLatitude(), b.getLongitude()) < 80
+            );
+            if (!exists) result.add(b);
+        }
+        return result;
+    }
 
     private String normalizeName(String s) {
         if (s == null) return "";
