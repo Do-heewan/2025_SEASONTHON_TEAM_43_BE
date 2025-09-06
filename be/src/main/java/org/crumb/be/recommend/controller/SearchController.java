@@ -20,18 +20,18 @@ public class SearchController {
 
     private final SearchService searchService;
 
-    private static Long me(String header) {
-        if (header == null) throw new IllegalStateException("missing X-User-Id");
-        return Long.parseLong(header);
-    }
+//    private static Long me(String header) {
+//        if (header == null) throw new IllegalStateException("missing X-User-Id");
+//        return Long.parseLong(header);
+//    }
 
     @Operation(summary = "빵집 검색(검색 이력 저장)")
     @GetMapping("/bakeries")
     public Mono<ApiResponse<List<SearchService.BakerySearchResult>>> search(
-            @RequestHeader(name="X-User-Id", required=false) String userId,
+            @RequestAttribute("userId") Long userId,
             @Valid @ModelAttribute SearchRequest req
     ) {
-        return searchService.searchAndLog(me(userId), req)
+        return searchService.searchAndLog(userId, req)
                 .map(ApiResponse::ok);
     }
 }

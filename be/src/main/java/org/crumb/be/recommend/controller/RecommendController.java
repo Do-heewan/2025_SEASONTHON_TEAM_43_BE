@@ -6,6 +6,7 @@ import lombok.RequiredArgsConstructor;
 import org.crumb.be.common.response.ApiResponse;
 import org.crumb.be.recommend.dto.RecommendBakeryResponse;
 import org.crumb.be.recommend.service.RecommendService;
+import org.crumb.be.service.KakaoLoginService;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -17,19 +18,23 @@ import java.util.List;
 public class RecommendController {
 
     private final RecommendService recommendService;
+    private final KakaoLoginService kakaoLoginService;
 
-    private static Long me(String header) {
-        if (header == null) throw new IllegalStateException("missing X-User-Id");
-        return Long.parseLong(header);
-    }
+//    private static Long me(String header) {
+//        if (header == null) throw new IllegalStateException("missing X-User-Id");
+//        return Long.parseLong(header);
+//    }
 
     @Operation(summary="주변 빵집 추천(반경/개수 고정: 5km/10개)")
     @GetMapping("/bakeries")
     public ApiResponse<List<RecommendBakeryResponse>> recommend(
-            @RequestHeader(name="X-User-Id", required=false) String userId,
+            @RequestHeader("Authorization") String authorization,
             @RequestParam double lat,
             @RequestParam double lng
     ) {
-        return ApiResponse.ok(recommendService.recommend(me(userId), lat, lng));
+        String token = authorization.replace("Bearer ", "").trim();
+        Long userId = kakaoLoginService.getUserInfo(token).getId();
+
+        return ApiResponse.ok(recommendService.recommend(userId, lat, lng));
     }
 }
