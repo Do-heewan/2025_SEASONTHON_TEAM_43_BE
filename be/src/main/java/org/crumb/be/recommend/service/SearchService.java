@@ -24,7 +24,7 @@ public class SearchService {
         // 1) Kakao 검색
         Mono<KakaoSearchResponse> mono = kakaoLocalClient.keywordSearch(
                 req.query(), req.lat(), req.lng(),
-                req.radius()==null? 3000 : req.radius(), // 기본 3km
+                req.radius()==null? 2000 : req.radius(), // 기본 2km
                 15
         );
 

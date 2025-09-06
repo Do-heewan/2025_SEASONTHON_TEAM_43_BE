@@ -43,7 +43,7 @@ fastapi:
   base-url: http://${FASTAPI_HOST}:8000
 
 recommend:
-  radius: 5000
+  radius: 2000
   limit: 10
 
 springdoc:

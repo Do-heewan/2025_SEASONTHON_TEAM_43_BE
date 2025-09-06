@@ -22,7 +22,7 @@ logger = logging.getLogger("bread-reco")
 
 # 환경 변수
 DATA_PATH = os.environ.get("RECO_DATA", "data/bakeries_clean.csv")
-RADIUS_M = int(os.environ.get("RECO_RADIUS_M", "5000"))             # 반경 5km 고정
+RADIUS_M = int(os.environ.get("RECO_RADIUS_M", "2000"))             # 반경 2km 고정
 LIMIT = int(os.environ.get("RECO_LIMIT", "10"))                     # 상위 10개 고정
 
 FEATURE_THUMBS      = os.getenv("RECO_THUMBNAILS", "0") == "1"  # 기본 OFF
