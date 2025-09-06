@@ -1,6 +1,6 @@
-package org.crumb.be.repository;
+package org.crumb.be.user.repository;
 
-import org.crumb.be.client.User;
+import org.crumb.be.user.entity.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

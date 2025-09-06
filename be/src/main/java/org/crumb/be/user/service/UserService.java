@@ -1,6 +1,6 @@
-package org.crumb.be.service;
+package org.crumb.be.user.service;
 
-import org.crumb.be.client.User;
+import org.crumb.be.user.entity.User;
 
 public interface UserService {
     User findByEmail(String email);

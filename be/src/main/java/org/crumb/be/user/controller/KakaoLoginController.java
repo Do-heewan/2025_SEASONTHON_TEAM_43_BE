@@ -1,12 +1,12 @@
-package org.crumb.be.controller;
+package org.crumb.be.user.controller;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.crumb.be.client.User;
-import org.crumb.be.service.JwtService;
-import org.crumb.be.service.KakaoLoginService;
-import org.crumb.be.service.KakaoUserInfoResponseDto;
-import org.crumb.be.service.UserService;
+import org.crumb.be.user.entity.User;
+import org.crumb.be.user.service.JwtService;
+import org.crumb.be.user.service.KakaoLoginService;
+import org.crumb.be.user.dto.KakaoUserInfoResponseDto;
+import org.crumb.be.user.service.UserService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;

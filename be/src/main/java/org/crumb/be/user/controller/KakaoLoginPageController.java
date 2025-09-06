@@ -1,4 +1,4 @@
-package org.crumb.be.controller;
+package org.crumb.be.user.controller;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;

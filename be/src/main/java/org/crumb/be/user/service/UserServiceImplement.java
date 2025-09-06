@@ -1,8 +1,8 @@
-package org.crumb.be.service;
+package org.crumb.be.user.service;
 
 import lombok.RequiredArgsConstructor;
-import org.crumb.be.client.User;
-import org.crumb.be.repository.UserRepository;
+import org.crumb.be.user.entity.User;
+import org.crumb.be.user.repository.UserRepository;
 import org.springframework.stereotype.Service;
 
 @Service

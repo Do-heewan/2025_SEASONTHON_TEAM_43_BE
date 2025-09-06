@@ -1,4 +1,4 @@
-package org.crumb.be.client;
+package org.crumb.be.user.entity;
 
 import jakarta.persistence.*;
 import lombok.Getter;
