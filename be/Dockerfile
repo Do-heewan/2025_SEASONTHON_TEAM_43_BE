@@ -11,10 +11,6 @@ RUN chmod +x gradlew
 COPY . .
 # 의존성 미리 다운 (테스트 제외)
 RUN ./gradlew clean bootJar -x test --no-daemon
-
-# bootJar만 생성하면 불필요한 작업이 줄어듦
-RUN ./gradlew clean bootJar -x test --no-daemon
-
 # -------- Run --------
 FROM openjdk:17-jdk-slim
 WORKDIR /app
