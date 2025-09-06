@@ -1,6 +1,7 @@
-package org.crumb.be.external.kakao;
+package org.crumb.be.client;
 
 import lombok.RequiredArgsConstructor;
+import org.crumb.be.recommend.dto.KakaoSearchResponse;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
