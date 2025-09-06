@@ -7,6 +7,7 @@ import lombok.RequiredArgsConstructor;
 import org.crumb.be.common.response.ApiResponse;
 import org.crumb.be.recommend.dto.SearchRequest;
 import org.crumb.be.recommend.service.SearchService;
+import org.crumb.be.user.service.KakaoLoginService;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Mono;
 
@@ -19,6 +20,7 @@ import java.util.List;
 public class SearchController {
 
     private final SearchService searchService;
+    private final KakaoLoginService kakaoLoginService;
 
 //    private static Long me(String header) {
 //        if (header == null) throw new IllegalStateException("missing X-User-Id");
@@ -28,9 +30,12 @@ public class SearchController {
     @Operation(summary = "빵집 검색(검색 이력 저장)")
     @GetMapping("/bakeries")
     public Mono<ApiResponse<List<SearchService.BakerySearchResult>>> search(
-            @RequestAttribute("userId") Long userId,
+            @RequestHeader("Authorization") String authorization,
             @Valid @ModelAttribute SearchRequest req
     ) {
+        String token = authorization.replace("Bearer ", "").trim();
+        Long userId = kakaoLoginService.getUserInfo(token).getId();
+
         return searchService.searchAndLog(userId, req)
                 .map(ApiResponse::ok);
     }
