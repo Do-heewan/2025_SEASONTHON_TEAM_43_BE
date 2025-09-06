@@ -6,14 +6,14 @@ spring:
   application:
     name: born-to-bread-backend
   datasource:
-    url: jdbc:postgresql://${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DB}
+    url: jdbc:postgresql://crumb-postgres:5432/${POSTGRES_DB}
     username: ${POSTGRES_USER}
     password: ${POSTGRES_PASSWORD}
     driver-class-name: org.postgresql.Driver
   jpa:
     open-in-view: false
     hibernate:
-      ddl-auto: update # ?? ? validate? ??
+      ddl-auto: update # 배포 시 validate로 변경
     properties:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
@@ -24,14 +24,16 @@ spring:
 logging:
   level:
     root: INFO
-    org.hibernate.SQL: DEBUG # ?? ??? ??
+    org.hibernate.SQL: DEBUG # 배포 시 변경
     org.hibernate.type: WARN
     org.crumb.be: INFO
 
 kakao:
+  base-url: https://dapi.kakao.com
   client_id: ${KAKAO_CLIENT_ID}
   client_secret: ${KAKAO_CLIENT_SECRET}
   redirect_uri: ${KAKAO_REDIRECT_URI}
+  rest-api-key: ${KAKAO_REST_API_KEY}
 
 app:
   kakao:
@@ -39,13 +41,20 @@ app:
   google:
     api-key: ${GOOGLE_PLACES_API_KEY}
 
-#springdoc:
-#  swagger-ui:
-#    path: /swagger-ui/index.html
-#    display-operation-id: true
-#    tags-sorter: alpha
-#    operations-sorter: method
-#    doc-expansion: none
-#    try-it-out-enabled: true
-#    filter: true
-#    with-credentials: true
+fastapi:
+  base-url: http://crumb-fastapi:8000
+
+recommend:
+  radius: 5000
+  limit: 10
+
+springdoc:
+  swagger-ui:
+    path: /swagger-ui/index.html
+    display-operation-id: true
+    tags-sorter: alpha
+    operations-sorter: method
+    doc-expansion: none
+    try-it-out-enabled: true
+    filter: true
+    with-credentials: true
