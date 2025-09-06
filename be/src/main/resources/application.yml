@@ -40,7 +40,7 @@ app:
     api-key: ${GOOGLE_PLACES_API_KEY}
 
 fastapi:
-  base-url: http://${FASTAPI_HOST}:8000
+  base-url: ${FASTAPI_HOST}:8000
 
 recommend:
   radius: 2000
