@@ -1,4 +1,4 @@
-package org.crumb.be.utils;
+package org.crumb.be.search.util;
 
 public class GeoUtils {
     private static final double EARTH_RADIUS = 6371000; // meters
