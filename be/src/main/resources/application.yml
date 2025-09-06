@@ -32,8 +32,10 @@ kakao:
   redirect_uri: ${KAKAO_REDIRECT_URI}
   rest-api-key: ${KAKAO_REST_API_KEY}
 
-recommend:
+fastapi:
   base-url: http://crumb-fastapi:8000
+
+recommend:
   radius: 5000
   limit: 10
 

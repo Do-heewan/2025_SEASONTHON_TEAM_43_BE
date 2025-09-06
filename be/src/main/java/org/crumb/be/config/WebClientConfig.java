@@ -20,4 +20,12 @@ public class WebClientConfig {
                 .clientConnector(new ReactorClientHttpConnector(HttpClient.create()))
                 .build();
     }
+
+    @Bean("fastapiClient")
+    public WebClient fastapiClient(@Value("${fastapi.base-url}") String baseUrl) {
+        return WebClient.builder()
+                .baseUrl(baseUrl)
+                .clientConnector(new ReactorClientHttpConnector(HttpClient.create()))
+                .build();
+    }
 }
