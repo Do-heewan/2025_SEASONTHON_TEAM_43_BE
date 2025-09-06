@@ -25,6 +25,12 @@ DATA_PATH = os.environ.get("RECO_DATA", "data/bakeries_clean.csv")
 RADIUS_M = int(os.environ.get("RECO_RADIUS_M", "5000"))             # 반경 5km 고정
 LIMIT = int(os.environ.get("RECO_LIMIT", "10"))                     # 상위 10개 고정
 
+FEATURE_THUMBS      = os.getenv("RECO_THUMBNAILS", "0") == "1"  # 기본 OFF
+THUMB_TIMEOUT_SEC   = float(os.getenv("RECO_THUMB_TIMEOUT_SEC", "0.6"))
+THUMB_CONCURRENCY   = int(os.getenv("RECO_THUMB_CONCURRENCY", "4"))
+GOOGLE_KEY          = os.getenv("GOOGLE_PLACES_API_KEY", "")
+PUBLIC_HOST_FASTAPI = os.getenv("PUBLIC_HOST_FASTAPI", "localhost:8000")  # 프록시 URL 구성용
+
 app = FastAPI(title="Bread Reco", version="1.0.0")
 
 DF: pd.DataFrame | None = None      # pandas DataFrame
@@ -105,6 +111,7 @@ class Item(BaseModel):
     intro: str
     distance: float
     score: float
+    thumbnailUrl: str | None = None
 
 @app.get("/health")
 def health():
@@ -116,11 +123,32 @@ def reload():
     DF, VEC, MAT = load_data()
     return {"ok": True, "rows": len(DF or [])}
 
+# 구글 사진 프록시
+@app.get("/photo")
+def photo(photo_reference: str, maxwidth: int = 400):
+    if not GOOGLE_KEY or not photo_reference:
+        raise HTTPException(status_code=400, detail="missing key or photo_reference")
+    url = (
+        "https://maps.googleapis.com/maps/api/place/photo"
+        f"?maxwidth={maxwidth}&photo_reference={photo_reference}&key={GOOGLE_KEY}"
+    )
+    try:
+        r = httpx.get(url, timeout=10, follow_redirects=True)
+        r.raise_for_status()
+        return StreamingResponse(
+            r.iter_bytes(),
+            media_type=r.headers.get("content-type", "image/jpeg"),
+            headers={"Cache-Control": "public, max-age=86400"}
+        )
+    except httpx.HTTPError:
+        raise HTTPException(status_code=502, detail="google photo fetch failed")
+
 @app.get("/recommend")
-def recommend(
+async def recommend(
         lat: float, lng: float,
         keywords: str = Query("", description="쉼표로 구분된 키워드"),
-        exclude: str = Query("", description="쉼표로 구분된 bakeryId 목록")
+        exclude: str = Query("", description="쉼표로 구분된 bakeryId 목록"),
+        thumbnails: bool = Query(False, description="썸네일 포함 여부")
 ):
     logger.info("[recommend] lat=%s lng=%s keywords=%s exclude=%s", lat, lng, keywords, exclude)
 
@@ -169,9 +197,10 @@ def recommend(
         df["score"] = 0.0
         out = df.sort_values(["distance"], ascending=True).head(LIMIT)
 
-    # 응답 생성 (itertuples로 안정/빠르게)
-    return [
     logger.info("[recommend] returning %d items", len(out))
+
+    # 1) 썸네일 없는 기본 응답 생성
+    items = [
         {
             "id": int(r.id),
             "name": str(r.name),
@@ -182,6 +211,35 @@ def recommend(
             "lng": float(r.lng),
             "score": float(r.score),
             "distance": float(r.distance),
+            "thumbnailUrl": None,   # 기본값
         }
         for r in out.itertuples(index=False)
     ]
+
+    # 2) 썸네일 옵션이 켜졌고, 키도 있고, 결과가 있을 때만 “최대 0.6초 내에서” 병렬 수집
+    if thumbnails and FEATURE_THUMBS and GOOGLE_KEY and items:
+        sem = asyncio.Semaphore(THUMB_CONCURRENCY)
+
+        async def _thumb_for(it):
+            # 동기 LRU 캐시 함수 → 스레드로 실행
+            async with sem:
+                try:
+                    with anyio.move_on_after(THUMB_TIMEOUT_SEC) as scope:
+                        ref = await anyio.to_thread.run_sync(
+                            get_photo_reference_by_name_addr,
+                            it["name"], it["address"],
+                            cancellable=True
+                        )
+                        if scope.cancel_called:
+                            return None
+                        if ref:
+                            return f"http://{PUBLIC_HOST_FASTAPI}/photo?photo_reference={ref}"
+                        return None
+                except Exception:
+                    return None
+
+        thumbs = await asyncio.gather(*(_thumb_for(it) for it in items), return_exceptions=True)
+        for it, t in zip(items, thumbs):
+            it["thumbnailUrl"] = None if isinstance(t, Exception) else t
+
+    return items
