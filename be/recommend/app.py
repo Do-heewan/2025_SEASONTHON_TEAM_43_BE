@@ -26,7 +26,7 @@ RADIUS_M = int(os.environ.get("RECO_RADIUS_M", "2000"))             # 반경 2km
 LIMIT = int(os.environ.get("RECO_LIMIT", "10"))                     # 상위 10개 고정
 
 FEATURE_THUMBS      = os.getenv("RECO_THUMBNAILS", "0") == "1"  # 기본 OFF
-THUMB_TIMEOUT_SEC   = float(os.getenv("RECO_THUMB_TIMEOUT_SEC", "0.6"))
+THUMB_TIMEOUT_SEC   = float(os.getenv("RECO_THUMB_TIMEOUT_SEC", "2.0"))
 THUMB_CONCURRENCY   = int(os.getenv("RECO_THUMB_CONCURRENCY", "4"))
 GOOGLE_KEY          = os.getenv("GOOGLE_PLACES_API_KEY", "")
 FASTAPI_HOST = os.getenv("FASTAPI_HOST", "localhost:8000")  # 프록시 URL 구성용
