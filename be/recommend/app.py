@@ -1,11 +1,26 @@
-import os, math
-from fastapi import FastAPI, Query
+import logging, os, math, time, traceback
+from fastapi import Request, FastAPI, Query, HTTPException
+from fastapi.responses import StreamingResponse, JSONResponse
 from pydantic import BaseModel
 import pandas as pd
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 from utils.geocode_kakao import haversine
+from starlette.middleware.base import BaseHTTPMiddleware
 
+import anyio, asyncio
+from utils.google_places import get_photo_reference_by_name_addr
+import httpx  # /photo 프록시용
+
+# ---- 로깅 기본 설정 ----
+LOG_LEVEL = os.getenv("LOG_LEVEL", "INFO").upper()
+logging.basicConfig(
+    level=LOG_LEVEL,
+    format="%(asctime)s | %(levelname)s | %(name)s | %(message)s",
+)
+logger = logging.getLogger("bread-reco")
+
+# 환경 변수
 DATA_PATH = os.environ.get("RECO_DATA", "data/bakeries_clean.csv")
 RADIUS_M = int(os.environ.get("RECO_RADIUS_M", "5000"))             # 반경 5km 고정
 LIMIT = int(os.environ.get("RECO_LIMIT", "10"))                     # 상위 10개 고정
@@ -16,6 +31,29 @@ DF: pd.DataFrame | None = None      # pandas DataFrame
 VEC: TfidfVectorizer | None = None  # TfidfVectorizer
 MAT = None                          # TF-IDF sparse matrix
 
+# ---- 요청/응답 간단 로깅 미들웨어 ----
+class SimpleAccessLogMiddleware(BaseHTTPMiddleware):
+    async def dispatch(self, request: Request, call_next):
+        start = time.time()
+        try:
+            response = await call_next(request)
+            return response
+        finally:
+            dur_ms = int((time.time() - start) * 1000)
+            logger.info(
+                "REQ %s %s -> %s %dms",
+                request.method, request.url.path, request.client.host if request.client else "-",
+                dur_ms,
+            )
+
+app.add_middleware(SimpleAccessLogMiddleware)
+
+# ---- 전역 예외 핸들러 (스택 로그는 찍되, 응답은 안전하게) ----
+@app.exception_handler(Exception)
+async def unhandled_exception_handler(request: Request, exc: Exception):
+    logger.exception("UNHANDLED ERROR on %s %s", request.method, request.url.path)
+    # 스택은 로그에만 남기고, 클라이언트로는 안전한 메시지 반환
+    return JSONResponse(status_code=500, content={"detail": "internal server error"})
 
 def load_data(path=DATA_PATH):
     import pandas as pd, os
@@ -84,9 +122,14 @@ def recommend(
         keywords: str = Query("", description="쉼표로 구분된 키워드"),
         exclude: str = Query("", description="쉼표로 구분된 bakeryId 목록")
 ):
+    logger.info("[recommend] lat=%s lng=%s keywords=%s exclude=%s", lat, lng, keywords, exclude)
+
     if DF is None:
+        logger.warning("[recommend] DF is None")
         return []
+
     df = DF.copy()
+    before_len = len(df)
 
     # 제외
     if exclude:
@@ -94,19 +137,24 @@ def recommend(
             ex = set(int(x) for x in exclude.split(",") if x)
             df = df[~df["id"].isin(ex)]
         except ValueError:
-            pass
+            logger.warning("[recommend] exclude parse error: %s", exclude)
 
     # 거리계산 + 반경 필터
     def dist(row):
         return haversine(lat, lng, float(row["lat"]), float(row["lng"]))
     df["distance"] = df.apply(dist, axis=1)
     df = df[df["distance"] <= RADIUS_M]
+    logger.debug("[recommend] filtered by radius: %d -> %d rows", before_len, len(df))
 
     # 키워드
     ks = [k.strip() for k in keywords.split(",") if k.strip()]
 
     # 점수 계산
-    if ks and VEC is not None and MAT is not None and len(DF) == MAT.shape[0]:
+    use_text = bool(ks) and (VEC is not None) and (MAT is not None) and (len(DF) == MAT.shape[0])
+    logger.debug("[recommend] use_text=%s  ks=%s  MAT.shape=%s  DF.len=%s",
+                 use_text, ks, getattr(MAT, "shape", None), len(DF))
+
+    if use_text:
         # 키워드가 있으면: TF-IDF 유사도 → 거리 tie-break
         # 전체 DF 기준으로 sims 계산 → Series로 만들고 인덱스 정렬
         qv = VEC.transform([" ".join(ks)])
@@ -123,6 +171,7 @@ def recommend(
 
     # 응답 생성 (itertuples로 안정/빠르게)
     return [
+    logger.info("[recommend] returning %d items", len(out))
         {
             "id": int(r.id),
             "name": str(r.name),
