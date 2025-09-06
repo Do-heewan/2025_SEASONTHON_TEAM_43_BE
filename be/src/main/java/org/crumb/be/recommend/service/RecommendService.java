@@ -51,7 +51,7 @@ public class RecommendService {
                                 .queryParam("lng", lng);
                         if (!keywords.isEmpty()) {
                             // FastAPI는 콤마 기준 split → 콤마로 조인
-                            b.queryParam("keywords", String.join(" ", keywords));
+                            b.queryParam("keywords", String.join(",", keywords));
                         }
                         return b.build();
                     })
