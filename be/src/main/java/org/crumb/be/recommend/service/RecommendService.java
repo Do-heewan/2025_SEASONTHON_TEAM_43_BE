@@ -66,7 +66,7 @@ public class RecommendService {
                             })
                     )
                     .bodyToFlux(RecommendedBakery.class)
-                    .timeout(Duration.ofSeconds(5))
+                    .timeout(Duration.ofSeconds(10))
                     .retryWhen(Retry.backoff(2, Duration.ofMillis(300))
                             .filter(ex -> !(ex instanceof WebClientResponseException)) // 4xx/5xx는 재시도 X
                     )
