@@ -36,8 +36,6 @@ kakao:
   rest-api-key: ${KAKAO_REST_API_KEY}
 
 app:
-  kakao:
-    rest-api-key: ${KAKAO_REST_API_KEY}
   google:
     api-key: ${GOOGLE_PLACES_API_KEY}
 
