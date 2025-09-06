@@ -224,17 +224,12 @@ async def recommend(
             # 동기 LRU 캐시 함수 → 스레드로 실행
             async with sem:
                 try:
-                    with anyio.move_on_after(THUMB_TIMEOUT_SEC) as scope:
-                        ref = await anyio.to_thread.run_sync(
+                    # 스레드에서 동기 httpx 호출 실행 (최대 2초 내 응답 목표)
+                    ref = await anyio.to_thread.run_sync(
                             get_photo_reference_by_name_addr,
-                            it["name"], it["address"],
-                            cancellable=True
-                        )
-                        if scope.cancel_called:
-                            return None
-                        if ref:
-                            return f"http://{PUBLIC_HOST_FASTAPI}/photo?photo_reference={ref}"
-                        return None
+                            it["name"], it["address"]
+                    )
+                    return f"http://{PUBLIC_HOST_FASTAPI}/photo?photo_reference={ref}" if ref else None
                 except Exception:
                     return None
 
