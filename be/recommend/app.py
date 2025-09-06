@@ -7,7 +7,7 @@ from sklearn.metrics.pairwise import cosine_similarity
 from utils.geocode_kakao import haversine
 
 DATA_PATH = os.environ.get("RECO_DATA", "data/bakeries_clean.csv")
-RADIUS_M = int(os.environ.get("RECO_RADIUS_M", "5000"))             # 반경 5km 고정
+RADIUS_M = int(os.environ.get("RECO_RADIUS_M", "2000"))             # 반경 2km 고정
 LIMIT = int(os.environ.get("RECO_LIMIT", "10"))                     # 상위 10개 고정
 
 app = FastAPI(title="Bread Reco", version="1.0.0")
