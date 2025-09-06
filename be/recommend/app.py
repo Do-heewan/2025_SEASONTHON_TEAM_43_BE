@@ -29,7 +29,7 @@ FEATURE_THUMBS      = os.getenv("RECO_THUMBNAILS", "0") == "1"  # 기본 OFF
 THUMB_TIMEOUT_SEC   = float(os.getenv("RECO_THUMB_TIMEOUT_SEC", "0.6"))
 THUMB_CONCURRENCY   = int(os.getenv("RECO_THUMB_CONCURRENCY", "4"))
 GOOGLE_KEY          = os.getenv("GOOGLE_PLACES_API_KEY", "")
-PUBLIC_HOST_FASTAPI = os.getenv("PUBLIC_HOST_FASTAPI", "localhost:8000")  # 프록시 URL 구성용
+FASTAPI_HOST = os.getenv("FASTAPI_HOST", "localhost:8000")  # 프록시 URL 구성용
 
 app = FastAPI(title="Bread Reco", version="1.0.0")
 
@@ -229,7 +229,7 @@ async def recommend(
                             get_photo_reference_by_name_addr,
                             it["name"], it["address"]
                     )
-                    return f"http://{PUBLIC_HOST_FASTAPI}/photo?photo_reference={ref}" if ref else None
+                    return f"http://{FASTAPI_HOST}/photo?photo_reference={ref}" if ref else None
                 except Exception:
                     return None
 
