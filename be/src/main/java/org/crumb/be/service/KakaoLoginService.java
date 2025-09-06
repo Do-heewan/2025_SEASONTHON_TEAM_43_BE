@@ -58,7 +58,7 @@ public class KakaoLoginService {
     }
 
     public KakaoUserInfoResponseDto getUserInfo(String accessToken) {
-        KakaoUserInfoResponseDto userInfo = restClientUser.get()
+        KakaoUserInfoResponseDto userInfo = restClientUser.post()
                 .uri("/v2/user/me")
                 .header(HttpHeaders.AUTHORIZATION, "Bearer " + accessToken)
                 .retrieve()
