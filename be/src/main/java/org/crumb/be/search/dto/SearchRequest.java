@@ -1,4 +1,4 @@
-package org.crumb.be.dto;
+package org.crumb.be.search.dto;
 
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;

@@ -1,9 +1,9 @@
-package org.crumb.be.service;
+package org.crumb.be.search.service;
 
 import lombok.RequiredArgsConstructor;
 import org.crumb.be.client.KakaoMapClient;
-import org.crumb.be.dto.KakaoBakeryDto;
-import org.crumb.be.utils.GeoUtils;
+import org.crumb.be.search.dto.KakaoBakeryDto;
+import org.crumb.be.search.util.GeoUtils;
 import org.springframework.stereotype.Service;
 
 import java.text.Normalizer;

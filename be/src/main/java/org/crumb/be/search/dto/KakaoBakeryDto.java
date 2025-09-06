@@ -1,4 +1,4 @@
-package org.crumb.be.dto;
+package org.crumb.be.search.dto;
 
 import lombok.Data;
 

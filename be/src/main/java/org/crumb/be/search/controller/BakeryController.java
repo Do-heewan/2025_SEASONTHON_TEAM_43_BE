@@ -1,17 +1,14 @@
-package org.crumb.be.controller;
+package org.crumb.be.search.controller;
 
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
-import org.crumb.be.dto.KakaoBakeryDto;
-import org.crumb.be.service.BakerySearchService;
+import org.crumb.be.search.dto.KakaoBakeryDto;
+import org.crumb.be.search.service.BakerySearchService;
 import org.springframework.http.MediaType;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
