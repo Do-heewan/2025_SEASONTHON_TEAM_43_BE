@@ -62,6 +62,7 @@ services:
     env_file:
       - .env
     environment:
+      FASTAPI_HOST: ${FASTAPI_HOST}
       KAKAO_REST_API_KEY: ${KAKAO_REST_API_KEY}
       RECO_RADIUS_M: ${RECO_RADIUS_M:-5000}
       RECO_LIMIT: ${RECO_LIMIT:-10}
