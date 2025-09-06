@@ -6,7 +6,7 @@ import lombok.RequiredArgsConstructor;
 import org.crumb.be.common.response.ApiResponse;
 import org.crumb.be.recommend.dto.RecommendBakeryResponse;
 import org.crumb.be.recommend.service.RecommendService;
-import org.crumb.be.service.KakaoLoginService;
+import org.crumb.be.user.service.KakaoLoginService;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;

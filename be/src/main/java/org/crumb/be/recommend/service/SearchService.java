@@ -1,8 +1,8 @@
 package org.crumb.be.recommend.service;
 
 import lombok.RequiredArgsConstructor;
-import org.crumb.be.external.kakao.KakaoLocalClient;
-import org.crumb.be.external.kakao.KakaoSearchResponse;
+import org.crumb.be.client.KakaoLocalClient;
+import org.crumb.be.recommend.dto.KakaoSearchResponse;
 import org.crumb.be.recommend.dto.SearchRequest;
 import org.crumb.be.recommend.entity.SearchHistory;
 import org.crumb.be.recommend.repository.SearchHistoryRepository;

@@ -4,7 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 
-import org.crumb.be.dto.KakaoBakeryDto;
+import org.crumb.be.search.dto.KakaoBakeryDto;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -24,7 +24,7 @@ public class KakaoMapClient {
 
     private final RestTemplate restTemplate = new RestTemplate();
 
-    @Value("${app.kakao.rest-api-key}")
+    @Value("${kakao.rest-api-key}")
     private String kakaoKey;
     private String searchUrl = "https://dapi.kakao.com/v2/local/search/keyword.json";
 
