@@ -1,4 +1,4 @@
-package org.crumb.be.external.kakao;
+package org.crumb.be.recommend.dto;
 
 import java.util.List;
 
