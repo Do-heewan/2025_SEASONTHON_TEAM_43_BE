@@ -7,10 +7,9 @@ public record RecommendBakeryResponse(
         Double lat,
         Double lng,
         String intro,
-        Double distance, // meters
-        String thumbnailUrl
+        Double distance // meters
 ) {
     public static RecommendBakeryResponse from(RecommendedBakery i) {
-        return new RecommendBakeryResponse(i.id(), i.name(), i.address(), i.lat(), i.lng(), i.intro(), i.distance(), i.thumbnailUrl());
+        return new RecommendBakeryResponse(i.id(), i.name(), i.address(), i.lat(), i.lng(), i.intro(), i.distance());
     }
 }

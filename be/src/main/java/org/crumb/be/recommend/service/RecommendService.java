@@ -48,8 +48,7 @@ public class RecommendService {
                     .uri(uriBuilder -> {
                         var b = uriBuilder.path("/recommend")
                                 .queryParam("lat", lat)
-                                .queryParam("lng", lng)
-                                .queryParam("thumbnails", true);
+                                .queryParam("lng", lng);
                         if (!keywords.isEmpty()) {
                             // FastAPI는 콤마 기준 split → 콤마로 조인
                             b.queryParam("keywords", String.join(",", keywords));

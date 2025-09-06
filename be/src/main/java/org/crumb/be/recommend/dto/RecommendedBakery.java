@@ -8,6 +8,5 @@ public record RecommendedBakery(
         Double lng,
         String intro,
         Double distance,
-        Double score,
-        String thumbnailUrl
+        Double score
 ) {}
