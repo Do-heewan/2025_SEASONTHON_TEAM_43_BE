@@ -1,9 +1,7 @@
 package org.crumb.be.service;
 
 import lombok.RequiredArgsConstructor;
-import org.crumb.be.client.GoogleMapClient;
 import org.crumb.be.client.KakaoMapClient;
-import org.crumb.be.dto.GoogleBakeryDto;
 import org.crumb.be.dto.KakaoBakeryDto;
 import org.crumb.be.utils.GeoUtils;
 import org.springframework.stereotype.Service;
@@ -18,7 +16,7 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class BakerySearchService {
     private final KakaoMapClient kakao;
-    private final GoogleMapClient google;
+//    private final GoogleMapClient google;
 
     public List<KakaoBakeryDto> search(double lat, double lng, int radius, int size) {
         List<KakaoBakeryDto> kakaoResult = kakao.searchBakery(lat, lng, radius);

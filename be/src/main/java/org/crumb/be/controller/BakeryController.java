@@ -4,7 +4,6 @@ import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
-import org.crumb.be.dto.GoogleBakeryDto;
 import org.crumb.be.dto.KakaoBakeryDto;
 import org.crumb.be.service.BakerySearchService;
 import org.springframework.http.MediaType;

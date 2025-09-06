@@ -4,6 +4,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
+      platforms: [linux/amd64]
     image: 'bread-life-spring:latest'
     container_name: crumb-spring-boot
     restart: always
@@ -54,6 +55,8 @@ services:
     build:
       context: ./recommend
       dockerfile: Dockerfile
+      platforms: [linux/amd64]
+    image: 'bread-life-fastapi:latest'
     container_name: crumb-fastapi
     restart: always
     env_file:

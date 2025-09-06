@@ -6,7 +6,7 @@ spring:
   application:
     name: born-to-bread-backend
   datasource:
-    url: jdbc:postgresql://crumb-postgres:5432/${POSTGRES_DB}
+    url: jdbc:postgresql://${POSTGRES_HOST}:5432/${POSTGRES_DB}
     username: ${POSTGRES_USER}
     password: ${POSTGRES_PASSWORD}
     driver-class-name: org.postgresql.Driver
@@ -42,7 +42,7 @@ app:
     api-key: ${GOOGLE_PLACES_API_KEY}
 
 fastapi:
-  base-url: http://crumb-fastapi:8000
+  base-url: http://${FASTAPI_HOST}:8000
 
 recommend:
   radius: 5000
