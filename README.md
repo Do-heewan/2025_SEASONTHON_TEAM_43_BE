@@ -3,7 +3,7 @@
 > 2025 SEASONTHON TEAM 43 · 백엔드 저장소
 > 내 주변 빵집을 찾고, 검색 기록을 바탕으로 취향에 맞는 빵집을 추천받고, 나만의 **빵지순례 코스**를 만들어 공유하는 서비스입니다.
 
-<img width="1200" height="460" alt="image" src="https://github.com/user-attachments/assets/e7de08dd-7324-415e-842f-d47000bf0902" />
+<img  width="280" alt="빵생빵사 로고" src="https://github.com/user-attachments/assets/e7de08dd-7324-415e-842f-d47000bf0902" />
 
 프론트엔드와 백엔드를 별도 저장소로 나누어 개발했으며, 이 저장소는 **API 서버(Spring Boot)** 와 **추천 서버(FastAPI)**, **DB(PostgreSQL)** 를 포함합니다.
 
