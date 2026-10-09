@@ -29,7 +29,7 @@ services:
 
   # PostgreSQL
   crumb-postgres:
-    image: 'postgres:latest'
+    image: 'postgres:16'
     container_name: crumb-postgres
     restart: always
     environment:
@@ -53,7 +53,7 @@ services:
   # FastAPI
   crumb-fastapi:
     build:
-      context: ./recommend
+      context: ../recommend
       dockerfile: Dockerfile
       platforms: [linux/amd64]
     image: 'bread-life-fastapi:latest'
@@ -75,7 +75,7 @@ services:
     ports:
       - "${FASTAPI_PORT:-8000}:8000"
     volumes:
-      - ./recommend:/app
+      - ../recommend:/app
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
       interval: 10s

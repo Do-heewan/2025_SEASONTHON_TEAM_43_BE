@@ -12,7 +12,7 @@ COPY . .
 # 의존성 미리 다운 (테스트 제외)
 RUN ./gradlew clean bootJar -x test --no-daemon
 # -------- Run --------
-FROM openjdk:17-jdk-slim
+FROM eclipse-temurin:17-jre
 WORKDIR /app
 
 # 보안상 비루트 유저 사용
